@@ -115,6 +115,80 @@
 
 
 //identifying  inactive persons, and groups their corresponding reportees into a structured object
+// const fs = require('fs');
+// const path = require('path');
+// const csv = require('csv-parser');
+
+// // Define the path to your CSV file
+// const filePath = path.join(__dirname, 'upload', 'file_test.csv');
+
+// // Set to store unique inactive values
+// const inactivelist = new Set();
+
+// // Array to store all rows for second pass
+// const allRows = [];
+
+// // Read and parse the CSV
+// fs.createReadStream(filePath)
+//   .pipe(csv())
+//   .on('data', (row) => {
+//     allRows.push(row); // Store row for second pass
+
+//     const irm = row['IRM']?.trim();
+//     const irmSepDate = row['IRM Sep Date']?.trim();
+//     const peoplePartner = row['People Partner']?.trim();
+//     const peoplePartnerSepDate = row['People Partner Sep Date']?.trim();
+//     const kdm = row['KDM']?.trim();
+//     const kdmSepDate = row['KDM Sep Date']?.trim();
+
+//     if (irm && irmSepDate) {
+//       inactivelist.add(irm);
+//     }
+//     if (peoplePartner && peoplePartnerSepDate) {
+//       inactivelist.add(peoplePartner);
+//     }
+//     if (kdm && kdmSepDate) {
+//       inactivelist.add(kdm);
+//     }
+//   })
+//   .on('end', () => {
+//     // Detect actual key for P. S. Number
+//     const psNumberKey = Object.keys(allRows[0]).find(
+//       key => key.trim().toLowerCase() === 'p. s. number'
+//     );
+
+//     if (!psNumberKey) {
+//       console.error('Could not find "P. S. Number" column in CSV.');
+//       return;
+//     }
+
+//     // Map to group reportees under each inactive person
+//     const inactiveReporteesMap = {};
+
+//     allRows.forEach((row) => {
+//       const psNumber = row[psNumberKey]?.trim();
+//       const irm = row['IRM']?.trim();
+//       const peoplePartner = row['People Partner']?.trim();
+//       const kdm = row['KDM']?.trim();
+
+//       [irm, peoplePartner, kdm].forEach((person) => {
+//         if (inactivelist.has(person)) {
+//           if (!inactiveReporteesMap[person]) {
+//             inactiveReporteesMap[person] = [];
+//           }
+//           inactiveReporteesMap[person].push(psNumber);
+//         }
+//       });
+//     });
+
+//     console.log('CSV file successfully read.');
+//     console.log('Inactive Values:', Array.from(inactivelist));
+//     console.log('Grouped Reportees by Inactive Person:', inactiveReporteesMap);
+//   })
+//   .on('error', (err) => {
+//     console.error('Error reading the CSV file:', err);
+//   });
+
 const fs = require('fs');
 const path = require('path');
 const csv = require('csv-parser');
@@ -172,7 +246,8 @@ fs.createReadStream(filePath)
       const kdm = row['KDM']?.trim();
 
       [irm, peoplePartner, kdm].forEach((person) => {
-        if (inactivelist.has(person)) {
+        const normalizedPerson = person?.trim().toLowerCase();
+        if (inactivelist.has(person) && normalizedPerson !== 'no_manager') {
           if (!inactiveReporteesMap[person]) {
             inactiveReporteesMap[person] = [];
           }
